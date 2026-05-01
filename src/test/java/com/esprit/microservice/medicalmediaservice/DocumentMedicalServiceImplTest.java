@@ -127,4 +127,5 @@ public class DocumentMedicalServiceImplTest {
         assertEquals("new.pdf", result.getNomFichier());
     }
 
+
 }

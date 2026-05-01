@@ -149,17 +149,18 @@ public class ImageMedicaleServiceImpl implements IImageMedicaleService {
             return result;
         }
 
-        // Récupérer toutes les URLs (uniquement les images avec URL)
+        // Récupérer uniquement les URLs HTTP/HTTPS valides (pas de chemins locaux)
         List<String> urls = triees.stream()
                 .map(ImageMedicale::getUrlStockage)
-                .filter(url -> url != null && !url.isBlank())
+                .filter(url -> url != null && !url.isBlank()
+                        && (url.startsWith("http://") || url.startsWith("https://")))
                 .collect(Collectors.toList());
 
         if (urls.size() < 2) {
             result.put("global_evolution", "INSUFFISANT");
             result.put("variation_moyenne", 0);
             result.put("variation_max", 0);
-            result.put("interpretation", "Pas assez d'images avec fichier associé");
+            result.put("interpretation", "Pas assez d'images avec URL Cloudinary valide (minimum 2 requises). Ajoutez des images avec une URL https:// valide.");
             result.put("comparaisons", Collections.emptyList());
             return result;
         }
@@ -177,6 +178,8 @@ public class ImageMedicaleServiceImpl implements IImageMedicaleService {
             interpretation = "⚠️ Dégradation détectée sur la période analysée";
         } else if ("MODIFICATION".equals(globalEvolution)) {
             interpretation = "🔍 Des changements ont été détectés entre les examens";
+        } else if ("ERROR".equals(globalEvolution)) {
+            interpretation = "❌ Le service d'analyse IA (Python) n'est pas disponible. Démarrez-le avec : uvicorn main:app --port 8000";
         } else {
             interpretation = "✅ État stable sur la période analysée";
         }
