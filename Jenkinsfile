@@ -16,19 +16,19 @@ stage('Build & Test') {
     }
 }
 
-        stage('SonarQube') {
-            steps {
-                withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                    sh '''
-                    mvn sonar:sonar \
-                    -Dsonar.projectKey=medical-media-service \
-                    -Dsonar.host.url=http://192.168.56.10:9000 \
-                    -Dsonar.login=$SONAR_TOKEN \
-                    -DskipTests
-                    '''
-                }
-            }
+       stage('SonarQube') {
+    steps {
+        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+            sh '''
+            mvn sonar:sonar \
+            -Dsonar.projectKey=medical-media-service \
+            -Dsonar.host.url=http://192.168.56.10:9000 \
+            -Dsonar.login=$SONAR_TOKEN \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
+            '''
         }
+    }
+}
 
         stage('Docker Build') {
             steps {
