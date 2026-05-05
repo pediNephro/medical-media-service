@@ -10,12 +10,11 @@ pipeline {
     }
 
     stages {
-
-        stage('Build') {
-            steps {
-                sh 'mvn clean install -Dmaven.test.skip=true'
-            }
-        }
+stage('Build & Test') {
+    steps {
+        sh 'mvn clean verify'
+    }
+}
 
         stage('SonarQube') {
             steps {
