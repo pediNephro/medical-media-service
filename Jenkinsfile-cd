@@ -13,19 +13,41 @@ pipeline {
             }
         }
 
-        stage('Stop Old Container') {
+        stage('Create Network') {
+            steps {
+                sh 'docker network create my-network || true'
+            }
+        }
+
+        stage('Start MySQL') {
             steps {
                 sh '''
-                docker stop medical-media || true
-                docker rm medical-media || true
+                docker rm -f mysql || true
+                docker run -d \
+                --name mysql \
+                --network my-network \
+                -e MYSQL_ROOT_PASSWORD=root \
+                -e MYSQL_DATABASE=nephro_medical_media \
+                mysql:8
                 '''
             }
         }
 
-        stage('Run Container') {
+        stage('Wait for MySQL') {
+            steps {
+                sh 'sleep 25'
+            }
+        }
+
+        stage('Run Medical Media') {
             steps {
                 sh '''
-                docker run -d -p 8086:8086 --name medical-media $IMAGE_NAME:latest
+                docker rm -f medical-media || true
+                docker run -d \
+                --name medical-media \
+                --network my-network \
+                -p 8086:8086 \
+                $IMAGE_NAME:latest
                 '''
             }
         }
