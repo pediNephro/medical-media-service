@@ -1,53 +1,27 @@
 pipeline {
-    agent any
 
-    environment {
-        IMAGE_NAME = "alaadid/medical-media-service"
-    }
+    agent any
 
     stages {
 
-        stage('Pull Image') {
-            steps {
-                sh 'docker pull $IMAGE_NAME:latest'
-            }
-        }
+        stage('Deploy To Kubernetes') {
 
-        stage('Create Network') {
             steps {
-                sh 'docker network create my-network || true'
-            }
-        }
 
-        stage('Start MySQL') {
-            steps {
                 sh '''
-                docker rm -f mysql || true
-                docker run -d \
-                --name mysql \
-                --network my-network \
-                -e MYSQL_ROOT_PASSWORD=root \
-                -e MYSQL_DATABASE=nephro_medical_media \
-                mysql:8
+                kubectl apply -f medical-media.yaml --validate=false
                 '''
             }
         }
 
-        stage('Wait for MySQL') {
-            steps {
-                sh 'sleep 25'
-            }
-        }
+        stage('Verify Deployment') {
 
-        stage('Run Medical Media') {
             steps {
+
                 sh '''
-                docker rm -f medical-media || true
-                docker run -d \
-                --name medical-media \
-                --network my-network \
-                -p 8086:8086 \
-                $IMAGE_NAME:latest
+                kubectl rollout status deployment/medical-media -n pedinephro
+
+                kubectl get pods -n pedinephro
                 '''
             }
         }
