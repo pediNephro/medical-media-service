@@ -20,7 +20,6 @@ pipeline {
         stage('SonarQube') {
             steps {
                 withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-
                     sh '''
                     mvn sonar:sonar \
                     -Dsonar.projectKey=medical-media-service \
@@ -39,7 +38,6 @@ pipeline {
 
         stage('Docker Push') {
             steps {
-
                 withCredentials([usernamePassword(
                     credentialsId: 'dockerhub-creds',
                     usernameVariable: 'USER',
@@ -56,7 +54,6 @@ pipeline {
         }
 
         stage('Update Kubernetes Repo') {
-
             steps {
 
                 withCredentials([usernamePassword(
@@ -79,7 +76,7 @@ pipeline {
 
                     git add medical-media.yaml
 
-                    git commit -m "update medical media image" || true
+                    git commit -m "update medical-media image" || true
 
                     git push || true
                     '''
@@ -88,7 +85,6 @@ pipeline {
         }
 
         stage('Trigger CD') {
-
             steps {
                 build job: 'medical-media-cd'
             }
